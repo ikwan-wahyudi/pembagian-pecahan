@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisasi Pembagian Pecahan - Kebun Pak Tani</title>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --primary-light: #e8f5e9;
+            --liquid-color: #4caf50;
+            --liquid-bg: #e0f2f1;
+            --accent: #f57c00;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f8f3;
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        header h1 { margin: 0 0 5px 0; font-size: 1.8rem; }
+
+        .card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        /* Layout Cerita & Ilustrasi */
+        .story-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: #fff8e1;
+            border-left: 6px solid var(--accent);
+            padding: 15px 20px;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 20px;
+        }
+
+        .farmer-img {
+            width: 110px;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .story-text {
+            font-size: 1.05rem;
+            line-height: 1.5;
+        }
+
+        /* Format Pecahan Vertikal */
+        .frac {
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: middle;
+            text-align: center;
+            padding: 0 4px;
+            font-weight: bold;
+        }
+        .frac .top {
+            border-bottom: 2px solid currentColor;
+            padding-bottom: 1px;
+        }
+        .frac .bottom {
+            padding-top: 1px;
+        }
+
+        /* Sliders Control */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            background: var(--primary-light);
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .control-item label {
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .slider-val {
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        input[type="range"] {
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        /* Interactive Step View */
+        .step-panel {
+            display: none;
+            border: 2px solid #a5d6a7;
+            border-radius: 10px;
+            padding: 20px;
+            background: #fafafa;
+            min-height: 320px;
+        }
+
+        .step-panel.active {
+            display: block;
+        }
+
+        .step-header {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-badge {
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .step-desc {
+            font-size: 1rem;
+            margin-bottom: 20px;
+            background: #eef7ee;
+            padding: 10px 15px;
+            border-radius: 6px;
+        }
+
+        /* Beakers & Visuals */
+        .beaker-flex {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 20px;
+            flex-wrap: wrap;
+            min-height: 170px;
+            margin-bottom: 15px;
+        }
+
+        .beaker-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .beaker {
+            width: 75px;
+            height: 150px;
+            border: 3px solid #555;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            position: relative;
+            background-color: var(--liquid-bg);
+            overflow: hidden;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+        }
+
+        .beaker-fill {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background-color: var(--liquid-color);
+            transition: height 0.4s ease;
+        }
+
+        .scale-line {
+            position: absolute;
+            width: 100%;
+            border-top: 1px dashed rgba(0,0,0,0.3);
+            box-sizing: border-box;
+        }
+
+        .beaker-label {
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #757575;
+        }
+
+        /* Summary Step Style */
+        .summary-grid {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .math-result-box {
+            text-align: center;
+            font-size: 1.4rem;
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 10px;
+            color: #1b5e20;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            border: 2px solid #a5d6a7;
+        }
+
+        .operator {
+            font-size: 1.6rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Visualisasi Pembagian Pecahan</h1>
+        <p>Aktivitas Literasi & Numerasi Kebun Pak Tani</p>
+    </header>
+
+    <div class="card">
+        <!-- Cerita & Ilustrasi Pak Tani -->
+        <div class="story-container">
+            <img src="https://png.pngtree.com/png-vector/20240720/ourmid/pngtree-farmer-watering-garden-agricultural-plant-png-image_13001524.png" alt="Pak Tani Menyiram" class="farmer-img">
+            <div class="story-text">
+                Pak Tani memiliki pupuk cair sebanyak 
+                <span class="frac"><span class="top" id="txt-num">1</span><span class="bottom" id="txt-den">2</span></span> 
+                liter. Pupuk tersebut akan dibagi rata ke dalam 
+                <strong id="txt-div">2</strong> 
+                wadah semprotan kecil. Berapa bagian pupuk yang didapatkan oleh setiap wadah kecil?
+            </div>
+        </div>
+
+        <!-- Slider Kontrol Interaktif -->
+        <div class="controls-grid">
+            <div class="control-item">
+                <label>Pembilang Awal (a): <span id="val-num" class="slider-val">1</span></label>
+                <input type="range" id="input-num" min="1" max="5" value="1" oninput="onSliderChange()">
+            </div>
+            <div class="control-item">
+                <label>Penyebut Awal (b): <span id="val-den" class="slider-val">2</span></label>
+                <input type="range" id="input-den" min="2" max="6" value="2" oninput="onSliderChange()">
+            </div>
+            <div class="control-item">
+                <label>Jumlah Wadah Pembagi (c): <span id="val-div" class="slider-val">2</span></label>
+                <input type="range" id="input-div" min="2" max="5" value="2" oninput="onSliderChange()">
+            </div>
+        </div>
+
+        <!-- TAMPILAN BERTAHAP (STEP BY STEP) -->
+        
+        <!-- LANGKAH 1 -->
+        <div class="step-panel active" id="panel-1">
+            <div class="step-header">
+                <span class="step-badge">1</span> Langkah 1: Melihat Isi Wadah Utama
+            </div>
+            <div class="step-desc">
+                Wadah utama terisi pupuk sebanyak <span class="frac"><span class="top lbl-num">1</span><span class="bottom lbl-den">2</span></span> liter. Garis-garis pada wadah menunjukkan pembagian menjadi <span class="lbl-den">2</span> bagian sama besar.
+            </div>
+            <div class="beaker-flex">
+                <div class="beaker-wrapper">
+                    <div class="beaker" id="beaker-s1"></div>
+                    <div class="beaker-label">Wadah Utama (<span class="frac"><span class="top lbl-num">1</span><span class="bottom lbl-den">2</span></span> Liter)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LANGKAH 2 -->
+        <div class="step-panel" id="panel-2">
+            <div class="step-header">
+                <span class="step-badge">2</span> Langkah 2: Membagi Skala Wadah
+            </div>
+            <div class="step-desc">
+                Karena pupuk akan dibagi ke <span class="lbl-div">2</span> wadah, maka setiap bagian pada wadah utama dipotong/dibagi lagi menjadi <span class="lbl-div">2</span> bagian kecil. Sekarang seluruh wadah terbagi menjadi <span id="lbl-total-parts">4</span> bagian sama kecil.
+            </div>
+            <div class="beaker-flex">
+                <div class="beaker-wrapper">
+                    <div class="beaker" id="beaker-s2"></div>
+                    <div class="beaker-label">Wadah Utama (Skala Baru)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LANGKAH 3 -->
+        <div class="step-panel" id="panel-3">
+            <div class="step-header">
+                <span class="step-badge">3</span> Langkah 3: Menuangkan ke Wadah Kecil
+            </div>
+            <div class="step-desc">
+                Pupuk dituangkan secara merata ke <span class="lbl-div">2</span> wadah semprotan kecil hingga habis. Mari amati berapa isi pada setiap wadah kecil!
+            </div>
+            <div class="beaker-flex" id="beaker-s3-container"></div>
+        </div>
+
+        <!-- LANGKAH 4: RANGKUMAN -->
+        <div class="step-panel" id="panel-4">
+            <div class="step-header">
+                <span class="step-badge">4</span> Rangkuman Proses Pembagian
+            </div>
+            <div class="step-desc">
+                Berikut adalah rangkuman dari seluruh proses visualisasi pembagian pecahan oleh bilangan asli:
+            </div>
+            
+            <div class="summary-grid">
+                <div class="beaker-wrapper">
+                    <div class="beaker" id="beaker-sum-1" style="height:120px; width:60px;"></div>
+                    <div class="beaker-label">Awal (<span class="frac"><span class="top lbl-num">1</span><span class="bottom lbl-den">2</span></span>)</div>
+                </div>
+                <div style="align-self: center;" class="operator">÷</div>
+                <div style="align-self: center; font-size:1.1rem; font-weight:bold;">
+                    <span class="lbl-div">2</span> Wadah
+                </div>
+                <div style="align-self: center;" class="operator">=</div>
+                <div class="beaker-wrapper">
+                    <div class="beaker" id="beaker-sum-2" style="height:120px; width:60px;"></div>
+                    <div class="beaker-label">1 Wadah Kecil</div>
+                </div>
+            </div>
+
+            <!-- Persamaan Matematika Akhir -->
+            <div class="math-result-box">
+                <span>Nilai tiap wadah: </span>
+                <span class="frac"><span class="top lbl-num">1</span><span class="bottom lbl-den">2</span></span>
+                <span class="operator">÷</span>
+                <span class="lbl-div">2</span>
+                <span class="operator">=</span>
+                <span class="frac"><span class="top lbl-num">1</span><span class="bottom" id="lbl-res-den">4</span></span>
+                <span>liter</span>
+            </div>
+        </div>
+
+        <!-- Navigasi Tombol -->
+        <div class="nav-buttons">
+            <button class="btn btn-secondary" id="btn-prev" onclick="changeStep(-1)" disabled>Sebelumnya</button>
+            <button class="btn" id="btn-next" onclick="changeStep(1)">Selanjutnya</button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let currentStep = 1;
+
+    function onSliderChange() {
+        let num = parseInt(document.getElementById('input-num').value);
+        let den = parseInt(document.getElementById('input-den').value);
+        
+        // Memastikan pembilang tidak melebihi penyebut
+        if (num > den) {
+            document.getElementById('input-num').value = den;
+        }
+        renderVisuals();
+    }
+
+    function changeStep(direction) {
+        currentStep += direction;
+        if (currentStep < 1) currentStep = 1;
+        if (currentStep > 4) currentStep = 4;
+
+        // Tampilkan panel sesuai langkah aktif
+        for (let i = 1; i <= 4; i++) {
+            document.getElementById(`panel-${i}`).classList.remove('active');
+        }
+        document.getElementById(`panel-${currentStep}`).classList.add('active');
+
+        // Atur status tombol navigasi
+        document.getElementById('btn-prev').disabled = (currentStep === 1);
+        
+        const nextBtn = document.getElementById('btn-next');
+        if (currentStep === 4) {
+            nextBtn.innerText = 'Selesai';
+            nextBtn.disabled = true;
+        } else {
+            nextBtn.innerText = 'Selanjutnya';
+            nextBtn.disabled = false;
+        }
+    }
+
+    function renderVisuals() {
+        const num = parseInt(document.getElementById('input-num').value);
+        const den = parseInt(document.getElementById('input-den').value);
+        const div = parseInt(document.getElementById('input-div').value);
+        const newTotalParts = den * div;
+
+        // Update teks nilai pada slider
+        document.getElementById('val-num').innerText = num;
+        document.getElementById('val-den').innerText = den;
+        document.getElementById('val-div').innerText = div;
+
+        // Update semua class yang menampung nilai Pembilang dan Penyebut
+        document.querySelectorAll('.lbl-num').forEach(el => el.innerText = num);
+        document.querySelectorAll('.lbl-den').forEach(el => el.innerText = den);
+        document.querySelectorAll('.lbl-div').forEach(el => el.innerText = div);
+        
+        document.getElementById('txt-num').innerText = num;
+        document.getElementById('txt-den').innerText = den;
+        document.getElementById('txt-div').innerText = div;
+
+        document.getElementById('lbl-total-parts').innerText = newTotalParts;
+        document.getElementById('lbl-res-den').innerText = newTotalParts;
+
+        // --- RENDER LANGKAH 1 ---
+        const b1 = document.getElementById('beaker-s1');
+        b1.innerHTML = '';
+        for (let i = 1; i < den; i++) {
+            const line = document.createElement('div');
+            line.className = 'scale-line';
+            line.style.bottom = (i * (100 / den)) + '%';
+            b1.appendChild(line);
+        }
+        const fill1 = document.createElement('div');
+        fill1.className = 'beaker-fill';
+        fill1.style.height = (num * (100 / den)) + '%';
+        b1.appendChild(fill1);
+
+        // --- RENDER LANGKAH 2 ---
+        const b2 = document.getElementById('beaker-s2');
+        b2.innerHTML = '';
+        for (let i = 1; i < newTotalParts; i++) {
+            const line = document.createElement('div');
+            line.className = 'scale-line';
+            line.style.bottom = (i * (100 / newTotalParts)) + '%';
+            if (i % div === 0) {
+                line.style.borderTop = '2px solid #333';
+            }
+            b2.appendChild(line);
+        }
+        const fill2 = document.createElement('div');
+        fill2.className = 'beaker-fill';
+        fill2.style.height = (num * (100 / den)) + '%';
+        b2.appendChild(fill2);
+
+        // --- RENDER LANGKAH 3 ---
+        const container3 = document.getElementById('beaker-s3-container');
+        container3.innerHTML = '';
+        const singleFillPercent = (num * (100 / newTotalParts));
+
+        for (let i = 1; i <= div; i++) {
+            const wrap = document.createElement('div');
+            wrap.className = 'beaker-wrapper';
+
+            const beaker = document.createElement('div');
+            beaker.className = 'beaker';
+            beaker.style.height = '120px';
+            beaker.style.width = '60px';
+
+            for (let k = 1; k < newTotalParts; k++) {
+                const line = document.createElement('div');
+                line.className = 'scale-line';
+                line.style.bottom = (k * (100 / newTotalParts)) + '%';
+                beaker.appendChild(line);
+            }
+
+            const fill = document.createElement('div');
+            fill.className = 'beaker-fill';
+            fill.style.height = singleFillPercent + '%';
+            beaker.appendChild(fill);
+
+            const label = document.createElement('div');
+            label.className = 'beaker-label';
+            label.innerText = `Wadah ${i}`;
+
+            wrap.appendChild(beaker);
+            wrap.appendChild(label);
+            container3.appendChild(wrap);
+        }
+
+        // --- RENDER LANGKAH 4 (RANGKUMAN) ---
+        const sum1 = document.getElementById('beaker-sum-1');
+        sum1.innerHTML = '';
+        for (let i = 1; i < den; i++) {
+            const line = document.createElement('div');
+            line.className = 'scale-line';
+            line.style.bottom = (i * (100 / den)) + '%';
+            sum1.appendChild(line);
+        }
+        const fillSum1 = document.createElement('div');
+        fillSum1.className = 'beaker-fill';
+        fillSum1.style.height = (num * (100 / den)) + '%';
+        sum1.appendChild(fillSum1);
+
+        const sum2 = document.getElementById('beaker-sum-2');
+        sum2.innerHTML = '';
+        for (let k = 1; k < newTotalParts; k++) {
+            const line = document.createElement('div');
+            line.className = 'scale-line';
+            line.style.bottom = (k * (100 / newTotalParts)) + '%';
+            sum2.appendChild(line);
+        }
+        const fillSum2 = document.createElement('div');
+        fillSum2.className = 'beaker-fill';
+        fillSum2.style.height = singleFillPercent + '%';
+        sum2.appendChild(fillSum2);
+    }
+
+    // Inisialisasi tampilan awal
+    window.onload = renderVisuals;
+</script>
+
+</body>
+</html>
