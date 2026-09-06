@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Matematika: Pembagian Pecahan</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .frac-vert {
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: middle;
+            text-align: center;
+            padding: 0 4px;
+            line-height: 1.1;
+        }
+        .frac-num {
+            border-bottom: 2px solid currentColor;
+            padding-bottom: 1px;
+        }
+        .frac-den {
+            padding-top: 1px;
+        }
+        .mixed-frac {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-3 md:p-6">
+
+    <div id="main-card" class="bg-white rounded-3xl shadow-2xl border-4 border-emerald-100 max-w-2xl w-full overflow-hidden transition-all duration-300">
+        
+        <!-- Header -->
+        <header class="bg-emerald-600 text-white p-6 text-center relative">
+            <div class="inline-block bg-emerald-500 text-emerald-100 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-2">
+                Evaluasi Pembelajaran
+            </div>
+            <h1 class="text-2xl md:text-3xl font-black">Kuis Pembagian Pecahan</h1>
+            <p class="text-emerald-100 text-xs md:text-sm mt-1">Pembagian Pecahan & Bilangan Asli (Konsep & Berhitung)</p>
+        </header>
+
+        <!-- LAYAR 1: INPUT IDENTITAS -->
+        <div id="setup-screen" class="p-6 md:p-8">
+            <div class="bg-emerald-50/70 p-4 rounded-2xl border border-emerald-100 mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-id-card text-emerald-600 text-2xl"></i>
+                <p class="text-xs text-slate-600">
+                    Masukkan nama lengkap dan kelas kamu dengan benar sebelum memulai kuis.
+                </p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="student-name" class="w-full border-2 border-slate-200 p-3 rounded-xl focus:outline-none focus:border-emerald-600 font-bold text-slate-800 transition" placeholder="Contoh: Budi Santoso">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Kelas</label>
+                    <input type="text" id="student-class" class="w-full border-2 border-slate-200 p-3 rounded-xl focus:outline-none focus:border-emerald-600 font-bold text-slate-800 transition" placeholder="Contoh: 5B">
+                </div>
+                <button type="button" onclick="startQuiz()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-base py-3.5 rounded-2xl shadow-lg hover:shadow-xl transition transform active:scale-95 flex items-center justify-center gap-2 mt-4 cursor-pointer">
+                    <span>Mulai Kerjakan Kuis (15 Soal)</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- LAYAR 2: DASHBOARD SOAL -->
+        <div id="quiz-screen" class="p-6 md:p-8 hidden">
+            
+            <!-- Header Status & Progress -->
+            <div class="mb-4">
+                <div class="flex justify-between items-center text-xs font-black text-slate-500 mb-2">
+                    <span id="quiz-progress-text">Soal 1 dari 15</span>
+                    <span id="quiz-progress-percent" class="text-emerald-600">0% Terjawab</span>
+                </div>
+                <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-200">
+                    <div id="quiz-progress-bar" class="bg-emerald-600 h-full rounded-full transition-all duration-300" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <!-- PANEL GRID NOMOR SOAL -->
+            <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 mb-6">
+                <div class="flex justify-between items-center mb-2 text-xs font-bold text-slate-600">
+                    <span><i class="fa-solid fa-grip mr-1 text-emerald-600"></i> Navigasi Soal:</span>
+                    <div class="flex gap-3 text-[10px]">
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Terjawab</span>
+                        <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-200 border border-slate-400 inline-block"></span> Belum</span>
+                    </div>
+                </div>
+                <div id="number-grid" class="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-15 gap-1.5">
+                    <!-- Tombol Nomor Soal via JS -->
+                </div>
+            </div>
+
+            <!-- Teks Soal -->
+            <div class="bg-emerald-50/50 p-5 rounded-2xl border border-emerald-100 mb-5 min-h-[100px] flex items-center">
+                <h3 id="question-text" class="text-base md:text-lg font-bold text-slate-800 leading-relaxed">
+                    <!-- Teks soal via JS -->
+                </h3>
+            </div>
+
+            <!-- Pilihan Jawaban -->
+            <div id="options-container" class="space-y-3 mb-6">
+                <!-- Tombol Opsi via JS -->
+            </div>
+
+            <!-- Tombol Navigasi Bawah -->
+            <div class="flex justify-between items-center pt-4 border-t border-slate-200 gap-2">
+                <button id="btn-prev" onclick="prevQuestion()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-extrabold text-xs md:text-sm px-4 py-2.5 rounded-xl transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-chevron-left"></i>
+                    <span>Sebelumnya</span>
+                </button>
+
+                <button id="btn-next" onclick="nextQuestion()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs md:text-sm px-4 py-2.5 rounded-xl transition flex items-center gap-1.5">
+                    <span>Selanjutnya</span>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+
+                <button id="btn-submit" onclick="confirmSubmit()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs md:text-sm px-5 py-2.5 rounded-xl transition flex items-center gap-1.5 hidden shadow-lg">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Kumpulkan Jawaban</span>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- LAYAR 3: HASIL AKHIR -->
+        <div id="result-screen" class="p-8 text-center hidden">
+            <div id="loading-spinner" class="py-12">
+                <i class="fa-solid fa-circle-notch fa-spin text-4xl text-emerald-600 mb-3"></i>
+                <p class="text-sm font-bold text-slate-600">Mengirim jawaban ke Google Sheets...</p>
+            </div>
+
+            <div id="result-content" class="hidden">
+                <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 border-4 border-emerald-200">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <h2 class="text-3xl font-black text-slate-800 mb-1">Kuis Selesai!</h2>
+                <p class="text-xs text-slate-500 mb-6">Jawaban kamu telah tersimpan secara otomatis di Spreadsheet guru.</p>
+                
+                <div class="bg-emerald-50/80 border-2 border-emerald-200 p-6 rounded-2xl max-w-xs mx-auto mb-6">
+                    <span class="text-xs text-emerald-700 font-extrabold uppercase tracking-wider block mb-1">Nilai Akhir Kamu</span>
+                    <div class="text-5xl font-black text-emerald-900" id="final-score">0</div>
+                </div>
+
+                <div class="text-xs text-slate-500 space-y-1">
+                    <p><b class="text-slate-700">Nama:</b> <span id="res-student-name">-</span></p>
+                    <p><b class="text-slate-700">Kelas:</b> <span id="res-student-class">-</span></p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRanpFdRNJJhZLYsRRyw7dp_qmcJd2st4pR6IzJiHjOuFplHyZPOjmS2PX-Xg16sxnxA/exec";
+
+        function f(num, den) {
+            return `<span class="frac-vert"><span class="frac-num">${num}</span><span class="frac-den">${den}</span></span>`;
+        }
+
+        function mf(whole, num, den) {
+            return `<span class="mixed-frac"><span>${whole}</span>${f(num, den)}</span>`;
+        }
+
+        // 15 Soal Pembagian Pecahan (Pecahan ÷ Bilangan Asli & Bilangan Asli ÷ Pecahan)
+        const questions = [
+            {
+                q: `Manakah operasi perkalian yang senilai dengan pembagian ${f(3, 4)} ÷ 2?`,
+                options: [`${f(3, 4)} × 2`, `${f(3, 4)} × ${f(1, 2)}`, `${f(4, 3)} × 2`, `3 × ${f(2, 4)}`],
+                answer: 1
+            },
+            {
+                q: `Hitunglah hasil dari ${f(2, 3)} ÷ 4 = ...`,
+                options: [f(1, 6), f(2, 7), f(1, 3), f(8, 3)],
+                answer: 0
+            },
+            {
+                q: `Hitunglah hasil dari 3 ÷ ${f(1, 2)} = ...`,
+                options: ["1", "3", "5", "6"],
+                answer: 3
+            },
+            {
+                q: `Ibu memiliki ${f(1, 2)} bagian kue tart. Kue tersebut dibagikan sama rata kepada 3 orang anaknya. Berapa bagian kue yang diterima setiap anak?`,
+                options: [f(1, 6), f(1, 5), f(2, 3), f(3, 2)],
+                answer: 0
+            },
+            {
+                q: `Pak Tani memiliki 2 liter pupuk cair. Pupuk tersebut dimasukkan ke dalam botol-botol kecil. Setiap botol berisi ${f(2, 3)} liter pupuk. Berapa banyak botol yang dibutuhkan Pak Tani?`,
+                options: ["2 botol", "3 botol", "4 botol", "6 botol"],
+                answer: 1
+            },
+            {
+                q: `Pernyataan berikut yang benar mengenai konsep pembagian bilangan asli oleh pecahan adalah...`,
+                options: [
+                    `Membagi dengan pecahan ${f(1, 3)} sama nilainya dengan mengalikan 3`,
+                    `Membagi dengan pecahan ${f(1, 3)} sama nilainya dengan mengurangi 3`,
+                    `Membagi dengan pecahan ${f(1, 3)} hasilnya selalu lebih kecil dari bilangan aslinya`,
+                    `Membagi pecahan tidak dapat diubah menjadi operasi perkalian`
+                ],
+                answer: 0
+            },
+            {
+                q: `Hitunglah hasil dari ${f(4, 5)} ÷ 2 = ...`,
+                options: [f(2, 5), f(3, 5), f(8, 5), f(1, 5)],
+                answer: 0
+            },
+            {
+                q: `Hitunglah hasil dari 4 ÷ ${f(2, 3)} = ...`,
+                options: ["4", "5", "6", "8"],
+                answer: 2
+            },
+            {
+                q: `Pita sepanjang ${f(3, 4)} meter dipotong menjadi 3 bagian yang sama panjang. Berapa meter panjang setiap potongan pita?`,
+                options: [f(1, 4), f(1, 3), f(1, 2), f(9, 4)],
+                answer: 0
+            },
+            {
+                q: `Hasil dari 5 ÷ ${f(1, 4)} adalah...`,
+                options: ["10", "15", "20", "25"],
+                answer: 2
+            },
+            {
+                q: `Siti menyiram tanaman menggunakan timba berkapasitas 6 liter. Jika sekali tuang ia menggunakan wadah kecil berukuran ${f(3, 4)} liter, berapa kali Siti harus menuang air hingga timba habis?`,
+                options: ["4 kali", "6 kali", "8 kali", "9 kali"],
+                answer: 2
+            },
+            {
+                q: `Bentuk sederhana dari ${f(6, 7)} ÷ 3 adalah...`,
+                options: [f(1, 7), f(2, 7), f(3, 7), f(18, 7)],
+                answer: 1
+            },
+            {
+                q: `Hitunglah hasil dari 2 ÷ ${f(3, 4)} dalam bentuk pecahan campuran!`,
+                options: [mf(1, 1, 2), mf(2, 1, 3), mf(2, 2, 3), mf(3, 1, 2)],
+                answer: 2
+            },
+            {
+                q: `Sebuah tali panjangnya ${f(5, 6)} meter akan diikatkan pada 5 buah tiang secara merata. Panjang tali pada setiap tiang adalah...`,
+                options: [`${f(1, 6)} meter`, `${f(1, 5)} meter`, `${f(2, 6)} meter`, `${f(25, 6)} meter`],
+                answer: 0
+            },
+            {
+                q: `Jika 3 ÷ Pecahan = 12, berapakah nilai pecahan yang tepat?`,
+                options: [f(1, 2), f(1, 3), f(1, 4), f(1, 6)],
+                answer: 2
+            }
+        ];
+
+        let currentQ = 0;
+        let studentAnswers = new Array(questions.length).fill(null);
+        let studentData = { nama: "", kelas: "", detailJawaban: [] };
+
+        function startQuiz() {
+            const nameInput = document.getElementById('student-name');
+            const classInput = document.getElementById('student-class');
+
+            const name = nameInput ? nameInput.value.trim() : "";
+            const cls = classInput ? classInput.value.trim() : "";
+
+            if (!name || !cls) {
+                alert("Harap isi Nama Lengkap dan Kelas terlebih dahulu!");
+                return;
+            }
+
+            studentData.nama = name;
+            studentData.kelas = cls;
+
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            
+            renderNumberGrid();
+            showQuestion(0);
+        }
+
+        function renderNumberGrid() {
+            const gridContainer = document.getElementById('number-grid');
+            gridContainer.innerHTML = '';
+
+            questions.forEach((_, idx) => {
+                const btn = document.createElement('button');
+                btn.id = `num-btn-${idx}`;
+                btn.type = "button";
+                btn.onclick = () => jumpToQuestion(idx);
+                btn.textContent = idx + 1;
+                gridContainer.appendChild(btn);
+            });
+            updateNumberGridUI();
+        }
+
+        function updateNumberGridUI() {
+            questions.forEach((_, idx) => {
+                const btn = document.getElementById(`num-btn-${idx}`);
+                if (!btn) return;
+
+                let baseStyle = "w-full h-8 rounded-lg font-bold text-xs flex items-center justify-center transition border ";
+
+                if (idx === currentQ) {
+                    baseStyle += "border-2 border-emerald-600 bg-emerald-600 text-white ring-2 ring-emerald-200 scale-105 z-10";
+                } else if (studentAnswers[idx] !== null) {
+                    baseStyle += "bg-emerald-500 text-white border-emerald-600";
+                } else {
+                    baseStyle += "bg-white text-slate-600 border-slate-300 hover:bg-slate-100";
+                }
+
+                btn.className = baseStyle;
+            });
+
+            const answeredCount = studentAnswers.filter(a => a !== null).length;
+            const percent = Math.round((answeredCount / questions.length) * 100);
+            
+            document.getElementById('quiz-progress-text').textContent = `Soal ${currentQ + 1} dari ${questions.length}`;
+            document.getElementById('quiz-progress-percent').textContent = `${percent}% Terjawab (${answeredCount}/${questions.length})`;
+            document.getElementById('quiz-progress-bar').style.width = `${percent}%`;
+        }
+
+        function showQuestion(idx) {
+            currentQ = idx;
+            const q = questions[currentQ];
+
+            document.getElementById('question-text').innerHTML = `${currentQ + 1}. ${q.q}`;
+
+            const optsContainer = document.getElementById('options-container');
+            optsContainer.innerHTML = '';
+
+            const labels = ['A', 'B', 'C', 'D'];
+
+            q.options.forEach((opt, optIdx) => {
+                const isSelected = (studentAnswers[currentQ] === optIdx);
+                const btn = document.createElement('button');
+                btn.type = "button";
+                
+                let btnStyle = "w-full text-left p-4 rounded-2xl border-2 font-semibold transition flex items-center gap-3 active:scale-[0.99] cursor-pointer ";
+                if (isSelected) {
+                    btnStyle += "border-emerald-600 bg-emerald-50 text-emerald-950 shadow-sm";
+                } else {
+                    btnStyle += "border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/30 text-slate-700";
+                }
+
+                btn.className = btnStyle;
+                btn.innerHTML = `
+                    <span class="w-8 h-8 rounded-xl ${isSelected ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'} font-extrabold flex items-center justify-center text-sm border border-slate-300 flex-shrink-0">${labels[optIdx]}</span>
+                    <span class="text-sm md:text-base">${opt}</span>
+                `;
+                btn.onclick = () => selectAnswer(optIdx);
+                optsContainer.appendChild(btn);
+            });
+
+            document.getElementById('btn-prev').disabled = (currentQ === 0);
+            document.getElementById('btn-prev').classList.toggle('opacity-40', currentQ === 0);
+            document.getElementById('btn-prev').classList.toggle('cursor-not-allowed', currentQ === 0);
+
+            const allAnswered = studentAnswers.every(a => a !== null);
+            if (currentQ === questions.length - 1 || allAnswered) {
+                document.getElementById('btn-submit').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-submit').classList.add('hidden');
+            }
+
+            updateNumberGridUI();
+        }
+
+        function selectAnswer(optIdx) {
+            studentAnswers[currentQ] = optIdx;
+            showQuestion(currentQ);
+        }
+
+        function nextQuestion() {
+            if (currentQ < questions.length - 1) {
+                showQuestion(currentQ + 1);
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQ > 0) {
+                showQuestion(currentQ - 1);
+            }
+        }
+
+        function jumpToQuestion(idx) {
+            showQuestion(idx);
+        }
+
+        function confirmSubmit() {
+            const unanswered = studentAnswers.filter(a => a === null).length;
+            if (unanswered > 0) {
+                if (!confirm(`Masih ada ${unanswered} soal yang belum kamu jawab. Yakin ingin mengumpulkan kuis sekarang?`)) {
+                    return;
+                }
+            } else {
+                if (!confirm("Apakah kamu yakin ingin mengumpulkan seluruh jawaban kuis ini?")) {
+                    return;
+                }
+            }
+            finishQuiz();
+        }
+
+        function finishQuiz() {
+            let score = 0;
+            studentData.detailJawaban = [];
+
+            questions.forEach((q, idx) => {
+                const selectedOpt = studentAnswers[idx];
+                const isCorrect = (selectedOpt === q.answer);
+                
+                if (isCorrect) score += (100 / questions.length);
+
+                const cleanQuestion = q.q.replace(/<[^>]*>?/gm, '');
+                const ansText = selectedOpt !== null ? q.options[selectedOpt].replace(/<[^>]*>?/gm, '') : 'Tidak Dijawab';
+
+                studentData.detailJawaban.push({
+                    no: idx + 1,
+                    soal: cleanQuestion,
+                    jawabanSiswa: ansText,
+                    benar: isCorrect
+                });
+            });
+
+            studentData.skor = Math.round(score);
+
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(studentData)
+            }).then(() => {
+                showResultUI();
+            }).catch(err => {
+                console.error("Gagal mengirim:", err);
+                showResultUI();
+            });
+        }
+
+        function showResultUI() {
+            document.getElementById('loading-spinner').classList.add('hidden');
+            document.getElementById('result-content').classList.remove('hidden');
+
+            document.getElementById('final-score').textContent = studentData.skor;
+            document.getElementById('res-student-name').textContent = studentData.nama;
+            document.getElementById('res-student-class').textContent = studentData.kelas;
+        }
+    </script>
+</body>
+</html>
